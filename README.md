@@ -7,3 +7,8 @@ This project is an iOS implementation of the [OpenHaystack macOS app](https://gi
 - Xcode 15.2 or later.
 - Proxy server to fetch records from (refer to [rkreutz/openhaystack-server](https://github.com/rkreutz/openhaystack-server)).
   - An AppleID with SMS enabled, to configure the proxy server.
+
+## Limitations
+
+- This project does not support accessories that use key derivation, which is supported by the original OpenHaystack app. If you try to import a `.plist` containing an accessory with derivation, that accessory will be filtered out.
+- The app requires access to the proxy server to fetch location records.
