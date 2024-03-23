@@ -68,6 +68,10 @@ final class AccessoriesRepository {
     
     func importAccessories(from plistUrl: URL) throws -> [Accessory] {
         let dtos = try AccessoryPlistDTO.load(from: plistUrl)
+            .filter { dto in
+                assert(!dto.usesDerivation, "This app doesn't support accessories with key derivation yet.")
+                return !dto.usesDerivation
+            }
         let accessories = try dtos.map(Accessory.init(from:))
         
         save(accessories: fetchAccessories() + accessories)
