@@ -202,8 +202,9 @@ final class AccessoriesRepository {
                 var accessory = accessory
                 
                 accessory.locations = (decryptedReports[hash] ?? [])
-                    .map { report in
-                        Location(
+                    .compactMap { report in
+                        guard let report = report else { return nil }
+                        return Location(
                             latitude: report.latitude,
                             longitude: report.longitude,
                             address: nil,

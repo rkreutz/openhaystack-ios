@@ -15,7 +15,7 @@ enum DecryptReports {
     static func decrypt(
         results: FindMyReportResults,
         with keys: [(keyId: SHA256Digest, privateKey: Data)]
-    ) throws -> [SHA256Digest: [FindMyLocationReport]] {
+    ) throws -> [SHA256Digest: [FindMyLocationReport?]] {
         let accessQueue = DispatchQueue(label: "threadSafeAccess", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .workItem)
         let encryptedResults: [SHA256Digest: [FindMyReport]] = Dictionary(
             grouping: results.results,
@@ -23,9 +23,9 @@ enum DecryptReports {
                 keys.first(where: { Data($0.keyId).base64EncodedString() == element.id })?.keyId ?? SHA256().finalize()
             }
         )
-        var decryptedResults: [SHA256Digest: [FindMyLocationReport]] = Dictionary(
-            uniqueKeysWithValues: encryptedResults.reduce(into: [(SHA256Digest, [FindMyLocationReport])]()) { partialResult, element in
-                partialResult += [(element.key, [FindMyLocationReport](repeating: .init(lat: 0, lng: 0, acc: 0, dP: .init(), t: .init(), c: 0), count: element.value.count))]
+        var decryptedResults: [SHA256Digest: [FindMyLocationReport?]] = Dictionary(
+            uniqueKeysWithValues: encryptedResults.reduce(into: [(SHA256Digest, [FindMyLocationReport?])]()) { partialResult, element in
+                partialResult += [(element.key, [FindMyLocationReport?](repeating: nil, count: element.value.count))]
             }
         )
         
@@ -132,48 +132,3 @@ enum DecryptReports {
         return Data(derivedKey)
     }
 }
-
-//
-//  OpenHaystack – Tracking personal Bluetooth devices via Apple's Find My network
-//
-//  Copyright © 2021 Secure Mobile Networking Lab (SEEMOO)
-//  Copyright © 2021 The Open Wireless Link Project
-//
-//  SPDX-License-Identifier: AGPL-3.0-only
-//
-//func decryptReports(completion: () -> Void) {
-//    print("Decrypting reports")
-//
-//    // Iterate over all devices
-//    for deviceIdx in 0..<devices.count {
-//        devices[deviceIdx].decryptedReports = []
-//        let device = devices[deviceIdx]
-//
-//        // Map the keys in a dictionary for faster access
-//        guard let reports = device.reports else { continue }
-//        let keyMap = device.keys.reduce(into: [String: FindMyKey](), { $0[$1.hashedKey.base64EncodedString()] = $1 })
-//
-//        let accessQueue = DispatchQueue(label: "threadSafeAccess", qos: .userInitiated, attributes: .concurrent, autoreleaseFrequency: .workItem, target: nil)
-//        var decryptedReports = [FindMyLocationReport](repeating: FindMyLocationReport(lat: 0, lng: 0, acc: 0, dP: Date(), t: Date(), c: 0), count: reports.count)
-//        DispatchQueue.concurrentPerform(iterations: reports.count) { (reportIdx) in
-//            let report = reports[reportIdx]
-//            guard let key = keyMap[report.id] else { return }
-//            do {
-//                // Decrypt the report
-//                let locationReport = try DecryptReports.decrypt(report: report, with: key)
-//                accessQueue.async(flags: .barrier) {
-//                    decryptedReports[reportIdx] = locationReport
-//                }
-//            } catch {
-//                return
-//            }
-//        }
-//
-//        accessQueue.sync {
-//            devices[deviceIdx].decryptedReports = decryptedReports
-//        }
-//    }
-//
-//    completion()
-//
-//}
