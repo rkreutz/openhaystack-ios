@@ -1,4 +1,4 @@
-# <img src="OpenHaystack/Assets/Assets.xcassets/AppIcon.appiconset/openhaystack.png" height=42 width=42 valign=bottom /> OpenHaystack (iOS)
+# <img src="OpenHaystack/Assets/Assets.xcassets/AppIcon.appiconset/openhaystack.png" height=42 width=42 valign=bottom styel="border-radius: 25%"/> OpenHaystack (iOS)
 
 This project is an iOS implementation of the [OpenHaystack macOS app](https://github.com/seemoo-lab/openhaystack). It relies on a proxy server to fetch location records rather than on-device header generation.
 
