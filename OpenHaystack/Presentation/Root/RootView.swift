@@ -228,7 +228,11 @@ private extension RootView {
                 containerViewTopConstraint?.isActive = false
                 containerViewTopConstraint = nil
             }
-            UIView.animate(withDuration: Constants.animationDuration, animations: layoutIfNeeded)
+            UIView.animate(
+                springDuration: Constants.animationDuration,
+                bounce: 0.6 * (1 - 1 / max(abs(velocity.y) / bounds.height, 1)),
+                animations: layoutIfNeeded
+            )
         case .failed, .cancelled:
             containerViewTopConstraint?.constant = containerViewOriginalOffset
             UIView.animate(withDuration: Constants.animationDuration, animations: layoutIfNeeded)
