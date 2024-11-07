@@ -191,14 +191,14 @@ extension AccessoriesViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        UIContextMenuConfiguration(
+        let accessory = accessoriesCache[indexPath.row]
+        return UIContextMenuConfiguration(
             actionProvider: { [weak self, accessoryModifier] _ in
                 let navigateAction = UIAction(
-                    title: "Navigate to",
+                    title: "Navigate to \(accessory.name)",
                     image: UIImage(systemName: "location.fill"),
                     handler: { _ in
                         guard 
-                            let accessory = self?.accessoriesCache[indexPath.row],
                             let location = accessory.latestLocation,
                             let url = URL(string:"http://maps.apple.com/?daddr=\(location.latitude),\(location.longitude)")
                         else { return }
@@ -211,8 +211,7 @@ extension AccessoriesViewController: UITableViewDelegate {
                     title: "Copy advertisement key (Base64)",
                     image: UIImage(systemName: "doc.on.clipboard.fill"),
                     handler: { _ in
-                        guard let accessoryId = self?.accessoriesCache[indexPath.row].id else { return }
-                        UIPasteboard.general.string = accessoryId
+                        UIPasteboard.general.string = accessory.id
                     }
                 )
                 
@@ -220,7 +219,6 @@ extension AccessoriesViewController: UITableViewDelegate {
                     title: "Edit",
                     image: UIImage(systemName: "square.and.pencil"),
                     handler: { _ in
-                        guard let accessory = self?.accessoriesCache[indexPath.row] else { return }
                         let editor = AccessoryEditorViewController(accessory: accessory, accessoryModifier: accessoryModifier)
                         self?.present(editor, animated: true)
                     }
@@ -231,8 +229,7 @@ extension AccessoriesViewController: UITableViewDelegate {
                     image: UIImage(systemName: "trash.fill"),
                     attributes: .destructive,
                     handler: { _ in
-                        guard let accessoryId = self?.accessoriesCache[indexPath.row].id else { return }
-                        self?.accessoryModifier.deleteAccessory(with: accessoryId)
+                        self?.accessoryModifier.deleteAccessory(with: accessory.id)
                     })
                                                 
                 return UIMenu(title: "", children: [navigateAction, copyKeyIdAction, modifyAction, deleteAction])
