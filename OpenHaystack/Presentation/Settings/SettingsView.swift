@@ -193,15 +193,15 @@ final class SettingsView: UIView {
         hasSetup = true
         
         NSLayoutConstraint.activate([
-            firstSectionHeader.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 12),
-            firstSectionHeader.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 32),
-            firstSectionHeader.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -32),
+            firstSectionHeader.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            firstSectionHeader.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            firstSectionHeader.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
         ])
         
         NSLayoutConstraint.activate([
             firstSectionView.topAnchor.constraint(equalTo: firstSectionHeader.bottomAnchor, constant: 4),
-            firstSectionView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            firstSectionView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            firstSectionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            firstSectionView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
         ])
         
         NSLayoutConstraint.activate([

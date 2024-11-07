@@ -176,9 +176,13 @@ final class RootView: UIView {
             ])
         } else {
             NSLayoutConstraint.activate([
-                view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
+                view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
             ])
         }
+        
+        view.layoutIfNeeded()
+        view.frame.origin = .zero
         
         tabBarBottomConstraint?.constant = shouldHideTabBar ? tabBar.bounds.height + safeAreaInsets.bottom : 0
         
