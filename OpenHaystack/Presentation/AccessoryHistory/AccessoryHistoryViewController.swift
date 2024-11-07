@@ -117,7 +117,10 @@ extension AccessoryHistoryViewController: UITableViewDataSource {
         } else {
             content.text = "\(accessory.locations[indexPath.row].latitude), \(accessory.locations[indexPath.row].longitude)"
         }
-        content.secondaryText = "\(Constants.dateFormatter.string(from: accessory.locations[indexPath.row].timestamp))"
+        content.secondaryText = """
+        \(Constants.dateFormatter.string(from: accessory.locations[indexPath.row].timestamp))
+        Accuracy: \(accessory.locations[indexPath.row].accuracy)\(accessory.locations[indexPath.row].confidence.map { ", Confidence: \($0)" } ?? "")
+        """
         content.secondaryTextProperties.color = .secondaryLabel
         cell.contentConfiguration = content
         if indexPath.row == 0 {

@@ -12,4 +12,6 @@ struct Location: Equatable {
     var longitude: Double
     var address: String?
     var timestamp: Date
+    var accuracy: UInt8
+    var confidence: UInt8?
 }

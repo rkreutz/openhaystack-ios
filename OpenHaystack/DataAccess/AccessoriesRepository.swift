@@ -208,7 +208,9 @@ final class AccessoriesRepository {
                             latitude: report.latitude,
                             longitude: report.longitude,
                             address: nil,
-                            timestamp: report.timestamp ?? report.datePublished
+                            timestamp: report.timestamp ?? report.datePublished,
+                            accuracy: report.accuracy,
+                            confidence: report.confidence
                         )
                     }
                     .filter { $0.timestamp >= Date().addingTimeInterval(-TimeInterval(reportsConfiguration.numberOfDays) * 24 * 60 * 60) }
