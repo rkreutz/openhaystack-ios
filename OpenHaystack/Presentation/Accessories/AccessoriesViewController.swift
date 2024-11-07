@@ -193,6 +193,20 @@ extension AccessoriesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         UIContextMenuConfiguration(
             actionProvider: { [weak self, accessoryModifier] _ in
+                let navigateAction = UIAction(
+                    title: "Navigate to",
+                    image: UIImage(systemName: "location.fill"),
+                    handler: { _ in
+                        guard 
+                            let accessory = self?.accessoriesCache[indexPath.row],
+                            let location = accessory.latestLocation,
+                            let url = URL(string:"http://maps.apple.com/?daddr=\(location.latitude),\(location.longitude)")
+                        else { return }
+                        
+                        UIApplication.shared.open(url)
+                    }
+                )
+                
                 let copyKeyIdAction = UIAction(
                     title: "Copy advertisement key (Base64)",
                     image: UIImage(systemName: "doc.on.clipboard.fill"),
@@ -221,7 +235,7 @@ extension AccessoriesViewController: UITableViewDelegate {
                         self?.accessoryModifier.deleteAccessory(with: accessoryId)
                     })
                                                 
-                return UIMenu(title: "", children: [copyKeyIdAction, modifyAction, deleteAction])
+                return UIMenu(title: "", children: [navigateAction, copyKeyIdAction, modifyAction, deleteAction])
             }
         )
     }
