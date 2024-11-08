@@ -66,6 +66,10 @@ final class RootView: UIView {
     private var containerViewTopConstraint: NSLayoutConstraint?
     private var containerViewMinHeightConstraint: NSLayoutConstraint?
     private var tabBarBottomConstraint: NSLayoutConstraint?
+    private var containerViewCompactConstraints: [NSLayoutConstraint] = []
+    private var containerViewRegularConstraints: [NSLayoutConstraint] = []
+    private var tabBarCompactConstraints: [NSLayoutConstraint] = []
+    private var tabBarRegularConstraints: [NSLayoutConstraint] = []
     
     init() {
         super.init(frame: .zero)
@@ -75,7 +79,6 @@ final class RootView: UIView {
         addSubview(contentView)
         addSubview(headerView)
         addSubview(tabBar)
-        
     }
     
     @available(*, unavailable)
@@ -98,19 +101,67 @@ final class RootView: UIView {
             mapView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
         
-        NSLayoutConstraint.activate([
+        containerViewCompactConstraints = [
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             containerView.topAnchor.constraint(greaterThanOrEqualToSystemSpacingBelow: safeAreaLayoutGuide.topAnchor, multiplier: 1)
-        ])
+        ]
+        
+        containerViewRegularConstraints = [
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            containerView.widthAnchor.constraint(equalToConstant: 350),
+            containerView.topAnchor.constraint(greaterThanOrEqualToSystemSpacingBelow: safeAreaLayoutGuide.topAnchor, multiplier: 1)
+        ]
+        
+        if traitCollection.horizontalSizeClass == .regular {
+            NSLayoutConstraint.activate(containerViewRegularConstraints)
+            NSLayoutConstraint.deactivate(containerViewCompactConstraints)
+        } else {
+            NSLayoutConstraint.activate(containerViewCompactConstraints)
+            NSLayoutConstraint.deactivate(containerViewRegularConstraints)
+        }
+        
+        registerForTraitChanges([UITraitHorizontalSizeClass.self]) { (this: RootView, _) in
+            if this.traitCollection.horizontalSizeClass == .regular {
+                NSLayoutConstraint.activate(this.containerViewRegularConstraints)
+                NSLayoutConstraint.deactivate(this.containerViewCompactConstraints)
+            } else {
+                NSLayoutConstraint.activate(this.containerViewCompactConstraints)
+                NSLayoutConstraint.deactivate(this.containerViewRegularConstraints)
+            }
+        }
         
         tabBarBottomConstraint = tabBar.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
-        NSLayoutConstraint.activate([
-            tabBarBottomConstraint.unsafelyUnwrapped,
+
+        tabBarCompactConstraints = [
             tabBar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
             tabBar.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor)
-        ])
+        ]
+        
+        tabBarRegularConstraints = [
+            tabBar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            tabBar.widthAnchor.constraint(equalToConstant: 350)
+        ]
+        
+        if traitCollection.horizontalSizeClass == .regular {
+            NSLayoutConstraint.activate([tabBarBottomConstraint.unsafelyUnwrapped] + tabBarRegularConstraints)
+            NSLayoutConstraint.deactivate(tabBarCompactConstraints)
+        } else {
+            NSLayoutConstraint.activate([tabBarBottomConstraint.unsafelyUnwrapped] + tabBarCompactConstraints)
+            NSLayoutConstraint.deactivate(tabBarRegularConstraints)
+        }
+        
+        registerForTraitChanges([UITraitHorizontalSizeClass.self]) { (this: RootView, _) in
+            if this.traitCollection.horizontalSizeClass == .regular {
+                NSLayoutConstraint.activate(this.tabBarRegularConstraints)
+                NSLayoutConstraint.deactivate(this.tabBarCompactConstraints)
+            } else {
+                NSLayoutConstraint.activate(this.tabBarCompactConstraints)
+                NSLayoutConstraint.deactivate(this.tabBarRegularConstraints)
+            }
+        }
         
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: containerView.topAnchor),
@@ -135,7 +186,11 @@ final class RootView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        mapView.layoutMargins = .init(top: 0, left: 0, bottom: containerView.bounds.height, right: 0)
+        if traitCollection.horizontalSizeClass == .regular {
+            mapView.layoutMargins = .init(top: 0, left: 16 + containerView.bounds.width, bottom: safeAreaInsets.bottom, right: 0)
+        } else {
+            mapView.layoutMargins = .init(top: 0, left: 0, bottom: containerView.bounds.height, right: 0)
+        }
     }
     
     func setContentView(

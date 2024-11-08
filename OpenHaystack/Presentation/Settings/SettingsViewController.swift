@@ -32,14 +32,22 @@ final class SettingsViewController: UIViewController, ContentController {
         set {}
     }
     
-    override var tabBarItem: UITabBarItem! {
-        get { Constants.tabBarItem }
-        set {}
-    }
-    
     override var preferredContentSize: CGSize {
         get { CGSize.init(width: CGFloat.nan, height: .nan) }
         set {}
+    }
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        tabBarItem = UITabBarItem(
+            title: "Settings",
+            image: UIImage(systemName: "gearshape"),
+            selectedImage: UIImage(systemName: "gearshape.fill")
+        )
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func loadView() {
@@ -111,12 +119,4 @@ extension SettingsViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         return false
     }
-}
-
-private enum Constants {
-    static let tabBarItem = UITabBarItem(
-        title: "Settings",
-        image: UIImage(systemName: "gearshape"),
-        selectedImage: UIImage(systemName: "gearshape.fill")
-    )
 }

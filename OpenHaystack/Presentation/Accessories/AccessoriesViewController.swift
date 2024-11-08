@@ -25,11 +25,6 @@ final class AccessoriesViewController: UIViewController, ContentController {
         set {}
     }
     
-    override var tabBarItem: UITabBarItem! {
-        get { Constants.tabBarItem }
-        set {}
-    }
-    
     override var preferredContentSize: CGSize {
         get { Constants.preferredContentSize }
         set {}
@@ -54,6 +49,11 @@ final class AccessoriesViewController: UIViewController, ContentController {
         self.accessoryCreator = accessoryCreator
         self.accessoriesImporter = accessoriesImporter
         super.init(nibName: nil, bundle: nil)
+        tabBarItem = UITabBarItem(
+            title: "Accessories",
+            image: UIImage(systemName: "map"),
+            selectedImage: UIImage(systemName: "map.fill")
+        )
     }
     
     @available(*, unavailable)
@@ -285,11 +285,6 @@ private extension AccessoriesViewController {
 }
 
 private enum Constants {
-    static let tabBarItem = UITabBarItem(
-        title: "Accessories",
-        image: UIImage(systemName: "map"),
-        selectedImage: UIImage(systemName: "map.fill")
-    )
     static let preferredContentSize = CGSize(
         width: CGFloat.greatestFiniteMagnitude,
         height: 200
