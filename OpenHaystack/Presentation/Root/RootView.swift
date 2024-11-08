@@ -137,12 +137,12 @@ final class RootView: UIView {
         tabBarBottomConstraint = tabBar.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
 
         tabBarCompactConstraints = [
-            tabBar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            tabBar.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor)
+            tabBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tabBar.trailingAnchor.constraint(equalTo: trailingAnchor)
         ]
         
         tabBarRegularConstraints = [
-            tabBar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            tabBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             tabBar.widthAnchor.constraint(equalToConstant: 350)
         ]
         
@@ -216,19 +216,23 @@ final class RootView: UIView {
             view.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 1)
         ])
         
-        if preferredContentSize.width.isFinite,
-           preferredContentSize.height.isFinite {
+        if preferredContentSize.height.isFinite {
+            NSLayoutConstraint.activate([
+                {
+                    let constraint = view.heightAnchor.constraint(equalToConstant: preferredContentSize.height)
+                    constraint.priority = .defaultHigh
+                    return constraint
+                }()
+            ])
+        }
+        
+        if preferredContentSize.width.isFinite {
             NSLayoutConstraint.activate([
                 {
                     let constraint = view.widthAnchor.constraint(equalToConstant: preferredContentSize.width)
                     constraint.priority = .defaultHigh
                     return constraint
-                }(),
-                {
-                    let constraint = view.heightAnchor.constraint(equalToConstant: preferredContentSize.height)
-                    constraint.priority = .defaultHigh
-                    return constraint
-                }(),
+                }()
             ])
         } else {
             NSLayoutConstraint.activate([
@@ -281,7 +285,7 @@ private extension RootView {
             let finalPositionY = max(min(containerViewOriginalOffset - totalTranslationY, bounds.height), 0)
             switch (finalPositionY / bounds.height) {
             case Constants.topRange:
-                containerViewTopConstraint?.constant = .greatestFiniteMagnitude
+                containerViewTopConstraint?.constant = bounds.height - 8 - safeAreaInsets.top
             case Constants.bottomRange:
                 containerViewTopConstraint?.constant = 0
             default:

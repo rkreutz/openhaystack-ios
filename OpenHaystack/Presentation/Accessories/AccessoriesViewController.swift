@@ -286,7 +286,7 @@ private extension AccessoriesViewController {
 
 private enum Constants {
     static let preferredContentSize = CGSize(
-        width: CGFloat.greatestFiniteMagnitude,
+        width: CGFloat.nan,
         height: 200
     )
     static let cellReuseIdentifier = "cell"

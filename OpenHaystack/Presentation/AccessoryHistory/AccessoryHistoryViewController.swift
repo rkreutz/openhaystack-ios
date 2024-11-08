@@ -163,7 +163,7 @@ private extension AccessoryHistoryViewController {
 
 private enum Constants {
     static let preferredContentSize = CGSize(
-        width: CGFloat.greatestFiniteMagnitude,
+        width: CGFloat.nan,
         height: 300
     )
     static let cellReuseIdentifier = "cell"
