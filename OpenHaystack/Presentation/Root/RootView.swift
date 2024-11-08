@@ -32,6 +32,7 @@ final class RootView: UIView {
         tabBar.isTranslucent = true
         tabBar.setContentHuggingPriority(.required, for: .vertical)
         tabBar.setContentCompressionResistancePriority(.required, for: .vertical)
+        tabBar.traitOverrides[UITraitHorizontalSizeClass.self] = .compact
         let barAppearance = UIBarAppearance()
         barAppearance.configureWithTransparentBackground()
         barAppearance.shadowColor = UIColor.separator
