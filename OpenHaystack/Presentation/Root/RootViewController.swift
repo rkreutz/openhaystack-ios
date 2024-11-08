@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import Combine
 
 final class RootViewController: UIViewController {
     var childrenContentControllers: [ContentController]
@@ -20,6 +21,7 @@ final class RootViewController: UIViewController {
     
     private let accessoriesFetcher: AccessoriesFetcher
     private var mapRenderer: MapRenderer?
+    private var cancellables: Set<AnyCancellable> = []
     
     init(childrenContentController: [ContentController], accessoriesFetcher: AccessoriesFetcher) {
         self.childrenContentControllers = childrenContentController
@@ -47,6 +49,13 @@ final class RootViewController: UIViewController {
         }
         
         refreshButton.addTarget(self, action: #selector(refresh), for: .touchUpInside)
+        accessoriesFetcher.isFetchingAccessories()
+            .receive(on: DispatchQueue.main)
+            .sink { [refreshButton] isFetching in
+                refreshButton.isRefreshing = isFetching
+            }
+            .store(in: &cancellables)
+        
         refresh()
     }
 }
@@ -106,18 +115,12 @@ extension RootViewController: ContainerController {
 private extension RootViewController {
     @objc
     func refresh() {
-        if !refreshButton.isRefreshing {
-            refreshButton.isRefreshing = true
-        }
-        accessoriesFetcher.fetchAccessories { [refreshButton] result in
+        accessoriesFetcher.fetchAccessories { result in
             switch result {
             case .success:
                 print("Fetched accessories")
             case .failure(let error):
                 print("Failed to fetch accessories: \(error)")
-            }
-            DispatchQueue.main.async {
-                refreshButton.isRefreshing = false                
             }
         }
     }

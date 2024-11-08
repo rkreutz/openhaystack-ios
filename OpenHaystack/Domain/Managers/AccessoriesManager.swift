@@ -14,6 +14,7 @@ protocol AccessoriesProvider {
 
 protocol AccessoriesFetcher {
     func fetchAccessories(_ completion: @escaping (Result<[Accessory], Error>) -> Void)
+    func isFetchingAccessories() -> AnyPublisher<Bool, Never>
 }
 
 protocol AccessoryModifier {
@@ -35,7 +36,9 @@ final class AccessoriesManager: AccessoriesProvider, AccessoriesFetcher, Accesso
     private let repository: AccessoriesRepository
     private let scanner: BluetoothScanner
     private var cancellabels: Set<AnyCancellable> = []
+    private var fetchPublisher: AnyPublisher<[Accessory], Error>?
     private let accessQueue = DispatchQueue(label: "serialQueue")
+    private let isFetchingAccessoriesSubject = CurrentValueSubject<Bool, Never>(false)
     init(repository: AccessoriesRepository, scanner: BluetoothScanner) {
         self.repository = repository
         self.scanner = scanner
@@ -54,21 +57,46 @@ final class AccessoriesManager: AccessoriesProvider, AccessoriesFetcher, Accesso
     }
     
     func fetchAccessories(_ completion: @escaping (Result<[Accessory], Error>) -> Void) {
-        repository.fetchAccessoriesReportedLocations()
-            .last()
-            .sink(
-                receiveCompletion: {
-                    guard case .failure(let error) = $0 else { return }
-                    completion(.failure(error))
-                },
-                receiveValue: { [weak self] accessories in
-                    self?.accessQueue.async {
-                        self?.storedAccessories = accessories
-                        completion(.success(accessories))
-                    }
+        accessQueue.sync {
+            if let fetchPublisher {
+                return fetchPublisher
+            } else {
+                self.fetchPublisher = repository.fetchAccessoriesReportedLocations()
+                    .last()
+                    .share()
+                    .handleEvents(
+                        receiveSubscription: { [weak self] _ in
+                            self?.isFetchingAccessoriesSubject.send(true)
+                        },
+                        receiveCompletion: { [weak self] _ in
+                            self?.accessQueue.async {
+                                self?.fetchPublisher = nil
+                                self?.isFetchingAccessoriesSubject.send(false)
+                            }
+                        }
+                    )
+                    .eraseToAnyPublisher()
+
+                return self.fetchPublisher.unsafelyUnwrapped
+            }
+        }
+        .sink(
+            receiveCompletion: {
+                guard case .failure(let error) = $0 else { return }
+                completion(.failure(error))
+            },
+            receiveValue: { [weak self] accessories in
+                self?.accessQueue.async {
+                    self?.storedAccessories = accessories
+                    completion(.success(accessories))
                 }
-            )
-            .store(in: &cancellabels)
+            }
+        )
+        .store(in: &cancellabels)
+    }
+    
+    func isFetchingAccessories() -> AnyPublisher<Bool, Never> {
+        isFetchingAccessoriesSubject.eraseToAnyPublisher()
     }
     
     func update(accessory: Accessory) {
