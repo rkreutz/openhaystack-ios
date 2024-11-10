@@ -33,37 +33,68 @@ final class AccessoryHistoryMapRenderer: NSObject, MapRenderer {
     func attach(to mapView: MKMapView) {
         mapView.delegate = self
         mapView.register(LocationAnnotation.View.self, forAnnotationViewWithReuseIdentifier: LocationAnnotation.View.reuseIdentifier)
+        let syncQueue = DispatchQueue(label: "com.rkreutz.OpenHaystack.AccessoryHistoryMapRenderer")
         
-        var annotations: [LocationAnnotation] = []
-        for annotation in mapView.annotations {
-            mapView.removeAnnotation(annotation)
-        }
+        var annotations: [String: LocationAnnotation] = [:]
+        mapView.removeAnnotations(mapView.annotations)
+        var hasCentered = false
         
         accessoriesProvider.accessories()
             .map { [accessoryId] in $0.first(where: { $0.id == accessoryId }) }
+            .removeDuplicates(by: { $0?.locations == $1?.locations })
+            .map { accessory -> ([LocationAnnotation], [LocationAnnotation], [LocationAnnotation]) in
+                var annotationsToBeAdded: [LocationAnnotation] = []
+                var annotationsToBeUpdated: [LocationAnnotation] = []
+                var annotationsToBeRemoved: [LocationAnnotation] = []
+                guard let accessory else {
+                    annotationsToBeRemoved = syncQueue.sync { annotations.values.map { $0 } }
+                    return (annotationsToBeAdded, annotationsToBeUpdated, annotationsToBeRemoved)
+                }
+                
+                for location in accessory.locations {
+                    if let annotation = syncQueue.sync(execute: { annotations[location.id] }) {
+                        if annotation.update(with: location, isLatest: location != accessory.latestLocation) {
+                            annotationsToBeUpdated.append(annotation)
+                        }
+                    } else {
+                        annotationsToBeAdded.append(LocationAnnotation(location: location, isLatest: location == accessory.latestLocation))
+                    }
+                }
+                
+                for annotationId in annotations.keys {
+                    guard !accessory.locations.contains(where: { $0.id == annotationId }) else { continue }
+                    if let annotation = annotations.removeValue(forKey: annotationId) {
+                        annotationsToBeRemoved.append(annotation)
+                    }
+                }
+                
+                return (annotationsToBeAdded, annotationsToBeUpdated, annotationsToBeRemoved)
+                
+            }
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { accessory in
-                if let accessory {
-                    mapView.removeAnnotations(annotations)
-                    annotations = accessory.locations.map { LocationAnnotation(location: $0, isLatest: $0 == accessory.latestLocation) }
-                    mapView.addAnnotations(annotations)
+            .sink(receiveValue: { (annotationsToBeAdded: [LocationAnnotation], annotationsToBeUpdated: [LocationAnnotation], annotationsToBeRemoved: [LocationAnnotation]) in
+                annotationsToBeUpdated.forEach(mapView.layoutAnnotationView(for:))
+                mapView.addAnnotations(annotationsToBeAdded)
+                mapView.removeAnnotations(annotationsToBeRemoved)
+                syncQueue.sync {
+                    annotationsToBeAdded.forEach { annotations[$0.id] = $0 }
+                    annotationsToBeRemoved.forEach { annotations.removeValue(forKey: $0.id) }
+                }
+                
+                if !hasCentered {
+                    hasCentered = true
                     mapView.showAnnotations(
-                        annotations,
+                        annotations.values.map { $0 },
                         withPadding: Constants.mapPadding,
                         animated: true
                     )
-                } else {
-                    mapView.removeAnnotations(annotations)
-                    annotations = []
                 }
             })
             .store(in: &cancellables)
         
         didTapLocation
             .removeDuplicates()
-            .compactMap { location in
-                annotations.first(where: { $0.location == location })
-            }
+            .compactMap { annotations[$0.id] }
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: {
                 mapView.setRegion(.init(center: $0.coordinate, latitudinalMeters: 200, longitudinalMeters: 200), animated: true)

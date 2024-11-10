@@ -84,6 +84,20 @@ final class AccessoriesViewController: UIViewController, ContentController {
             .store(in: &cancellables)
         
         accessoriesProvider.accessories()
+            .removeDuplicates(by: { lhs, rhs -> Bool in
+                guard lhs.count == rhs.count else { return false }
+                return zip(lhs, rhs).allSatisfy { lhs, rhs in
+                    return lhs.id == rhs.id
+                    && lhs.name == rhs.name
+                    && lhs.color == rhs.color
+                    && lhs.imageName == rhs.imageName
+                    && lhs.status == rhs.status
+                    && lhs.latestLocation?.address == rhs.latestLocation?.address
+                    && lhs.latestLocation?.timestamp == rhs.latestLocation?.timestamp
+                    && lhs.latestLocation?.latitude == rhs.latestLocation?.latitude
+                    && lhs.latestLocation?.longitude == rhs.latestLocation?.longitude
+                }
+            })
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] accessories in
                 self?.accessoriesCache = accessories

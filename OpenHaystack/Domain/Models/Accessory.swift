@@ -9,13 +9,13 @@ import Foundation
 import CoreLocation
 
 struct Accessory: Identifiable {
-    enum Status {
+    enum Status: Equatable {
         case connected
         case active
         case inactive
     }
     
-    struct Color {
+    struct Color: Equatable {
         var red: Double
         var green: Double
         var blue: Double

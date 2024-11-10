@@ -66,6 +66,7 @@ final class AccessoryHistoryViewController: UIViewController, ContentController 
         
         accessoriesProvider.accessories()
             .compactMap { [accessoryId] in $0.first(where: { $0.id == accessoryId }) }
+            .removeDuplicates(by: { lhs, rhs in lhs.locations == rhs.locations })
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] accessory in
                 self?.accessoryCache = accessory

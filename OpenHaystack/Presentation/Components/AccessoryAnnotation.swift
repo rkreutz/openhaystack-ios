@@ -51,11 +51,22 @@ final class AccessoryAnnotation: MKPointAnnotation, Identifiable {
         self.title = accessory.name
     }
     
-    func update(with accessory: Accessory) {
+    func update(with accessory: Accessory) -> Bool {
+        guard
+            accessory.id != self.accessory.id ||
+            accessory.name != self.accessory.name ||
+            accessory.latestLocation?.latitude != self.accessory.latestLocation?.latitude ||
+            accessory.latestLocation?.longitude != self.accessory.latestLocation?.longitude ||
+            accessory.imageName != self.accessory.imageName ||
+            accessory.color != self.accessory.color
+        else { return false }
+        
         self.accessory = accessory
         if let latestLocation = accessory.latestLocation {
             coordinate = CLLocationCoordinate2D(latitude: latestLocation.latitude, longitude: latestLocation.longitude)
         }
         title = accessory.name
+
+        return true
     }
 }

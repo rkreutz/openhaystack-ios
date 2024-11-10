@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct Location: Equatable {
+struct Location: Equatable, Identifiable {
+    var id: String { "\(timestamp)\(latitude)\(longitude)" }
     var latitude: Double
     var longitude: Double
     var address: String?

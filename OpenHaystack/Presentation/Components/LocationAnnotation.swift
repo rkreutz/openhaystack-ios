@@ -39,6 +39,7 @@ final class LocationAnnotation: MKPointAnnotation {
         }
     }
     
+    var id: String { location.id }
     private(set) var location: Location
     private(set) var isLatest: Bool
     
@@ -48,5 +49,22 @@ final class LocationAnnotation: MKPointAnnotation {
         super.init()
         self.coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
         self.title = location.address ?? "\(location.latitude), \(location.longitude)"
+    }
+    
+    func update(with location: Location, isLatest: Bool) -> Bool {
+        guard
+            location.id != self.location.id ||
+            location.latitude != self.location.latitude ||
+            location.longitude != self.location.longitude ||
+            location.address != self.location.address ||
+            isLatest != self.isLatest
+        else { return false }
+        
+        self.location = location
+        self.isLatest = isLatest
+        self.coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+        self.title = location.address ?? "\(location.latitude), \(location.longitude)"
+
+        return true
     }
 }
