@@ -18,7 +18,6 @@ final class GeocodeRepository {
     // TODO: Backpressure this to throtle 50 requests per minute
     func reverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
         Future { fulfill in self.remoteReverseGeocodeLocation(location) { fulfill($0) } }
-            .delay(for: .init(integerLiteral: Int.random(in: 0 ..< 10)), scheduler: DispatchQueue.main)
             .catch { error in
                 switch error {
                 case let error as CLError where error.code == CLError.Code.network:
