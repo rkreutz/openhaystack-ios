@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,7 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             protectedStorage: KeychainStorage(),
             httpClient: URLSessionHTTPClient(session: .shared),
             serverConfigurationRepository: ServerConfigurationRepository(storage: UserDefaults.standard), 
-            reportsConfigurationRepository: ReportsConfigurationRepository(storage: UserDefaults.standard)
+            reportsConfigurationRepository: ReportsConfigurationRepository(storage: UserDefaults.standard), 
+            geocodeRepository: GeocodeRepository()
         ),
         scanner: .init()
     )

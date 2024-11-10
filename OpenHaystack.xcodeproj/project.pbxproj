@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3759199D2CDDBAFC00C9B23C /* GeocodeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */; };
 		378DC76A2BAE8F9A00007286 /* LocationDotLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC7692BAE8F9A00007286 /* LocationDotLayer.swift */; };
 		378DC76C2BAE909400007286 /* CALayer+DrawImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC76B2BAE909400007286 /* CALayer+DrawImage.swift */; };
 		378DC76E2BAE989800007286 /* CGRect+Pad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC76D2BAE989800007286 /* CGRect+Pad.swift */; };
@@ -64,6 +65,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocodeRepository.swift; sourceTree = "<group>"; };
 		378DC7692BAE8F9A00007286 /* LocationDotLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDotLayer.swift; sourceTree = "<group>"; };
 		378DC76B2BAE909400007286 /* CALayer+DrawImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+DrawImage.swift"; sourceTree = "<group>"; };
 		378DC76D2BAE989800007286 /* CGRect+Pad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Pad.swift"; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 				37F09ECD2BAB374D009A0BAB /* AccessoriesRepository.swift */,
 				37F09EFC2BADFC6D009A0BAB /* BluetoothScanner.swift */,
 				37F09EDA2BAC44F3009A0BAB /* DecryptReports.swift */,
+				3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */,
 				37F09ED42BABA3A6009A0BAB /* HTTPClient.swift */,
 				37F09EE52BAC5BEE009A0BAB /* KeychainStorage.swift */,
 				37F09EC42BAAED77009A0BAB /* KeyValueStorage.swift */,
@@ -444,6 +447,7 @@
 				37F09EA72BA3C90E009A0BAB /* AccessoryHistoryView.swift in Sources */,
 				37F09EA52BA3C8FC009A0BAB /* AccessoryHistoryViewController.swift in Sources */,
 				37F09EFF2BADFE00009A0BAB /* Advertisement.swift in Sources */,
+				3759199D2CDDBAFC00C9B23C /* GeocodeRepository.swift in Sources */,
 				37F09EBC2BA89049009A0BAB /* AccessoryHistoryMapRenderer.swift in Sources */,
 				37F09EE12BAC47DF009A0BAB /* BoringSSL.m in Sources */,
 				37F09E8F2BA13524009A0BAB /* RootView.swift in Sources */,

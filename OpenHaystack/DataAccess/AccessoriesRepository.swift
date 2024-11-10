@@ -28,18 +28,21 @@ final class AccessoriesRepository {
     private let httpClient: HTTPClient
     private let serverConfigurationRepository: ServerConfigurationRepository
     private let reportsConfigurationRepository: ReportsConfigurationRepository
+    private let geocodeRepository: GeocodeRepository
     init(
         storage: KeyValueStorage,
         protectedStorage: ProtectedKeyValueStorage,
         httpClient: HTTPClient,
         serverConfigurationRepository: ServerConfigurationRepository,
-        reportsConfigurationRepository: ReportsConfigurationRepository
+        reportsConfigurationRepository: ReportsConfigurationRepository,
+        geocodeRepository: GeocodeRepository
     ) {
         self.storage = storage
         self.protectedStorage = protectedStorage
         self.httpClient = httpClient
         self.serverConfigurationRepository = serverConfigurationRepository
         self.reportsConfigurationRepository = reportsConfigurationRepository
+        self.geocodeRepository = geocodeRepository
     }
     
     func createAccessory(name: String, imageName: String, color: Accessory.Color) -> Accessory? {
@@ -222,32 +225,48 @@ final class AccessoriesRepository {
         }
     }
     
-    // TODO: Backpressure this to throtle 50 requests per minute
     private func reverseGeocodeLocations() -> ([Accessory]) -> AnyPublisher<[Accessory], Swift.Error> {
-        { accessories in
-            let dispatchGroup = DispatchGroup()
-            let accessQueue = DispatchQueue(label: "syncQueue")
-            return Future<[Accessory], Swift.Error> { fulfill in
-                var accessories = accessories
-                for (accessoryIndex, accessory) in accessories.enumerated() {
-                    for (locationIndex, location) in accessory.locations.enumerated() {
-                        dispatchGroup.enter()
-                        CLGeocoder().reverseGeocodeLocation(CLLocation(from: location)) { placemarks, error in
-                            defer { dispatchGroup.leave() }
-                            guard let placemark = placemarks?.first else { return }
-                            accessQueue.sync {
-                                accessories[accessoryIndex].locations[locationIndex].address = placemark.name ?? placemark.thoroughfare ?? placemark.subLocality ?? placemark.locality
-                            }
-                        }
-                    }
+        { [geocodeRepository] (accessories: [Accessory]) -> AnyPublisher<[Accessory], Swift.Error> in
+            return accessories.reverseGeocodeLocations(geocodeRepository: geocodeRepository)
+                .receive(on: DispatchQueue(label: "syncQueue"))
+                .scan(accessories) { partialResult, element in
+                    let (accessoryIndex, locationIndex, placemark) = (element.accessoryIndex, element.locationIndex, element.placemark)
+                    var partialResult = partialResult
+                    partialResult[accessoryIndex].locations[locationIndex].address = placemark?.name ?? placemark?.thoroughfare ?? placemark?.subLocality ?? placemark?.locality
+                    return partialResult
                 }
-                
-                dispatchGroup.notify(queue: DispatchQueue.global()) {
-                    fulfill(.success(accessories))
-                }
-            }
-            .eraseToAnyPublisher()
+                .prepend(accessories)
+                .eraseToAnyPublisher()
         }
+    }
+}
+
+private extension Array where Element == Accessory {
+    struct FlattenAccesoryLocationPlacemark {
+        var accessoryIndex: Int
+        var locationIndex: Int
+        var placemark: CLPlacemark?
+    }
+    
+    func reverseGeocodeLocations(geocodeRepository: GeocodeRepository) -> AnyPublisher<FlattenAccesoryLocationPlacemark, Swift.Error> {
+        return Publishers
+            .MergeMany(
+                enumerated()
+                    .flatMap { accessoryIndex, accessory in
+                        accessory.locations
+                            .enumerated()
+                            .map { (accessoryIndex, $0, $1) }
+                    }
+                    .map { (accessoryIndex, locationIndex, location) -> AnyPublisher<FlattenAccesoryLocationPlacemark, Swift.Error> in
+                        geocodeRepository.reverseGeocodeLocation(CLLocation(from: location))
+                            .map { $0 as CLPlacemark? }
+                            .catch { _ in Just(nil) }
+                            .map { FlattenAccesoryLocationPlacemark(accessoryIndex: accessoryIndex, locationIndex: locationIndex, placemark: $0) }
+                            .setFailureType(to: Swift.Error.self)
+                            .eraseToAnyPublisher()
+                    }
+            )
+            .eraseToAnyPublisher()
     }
 }
 

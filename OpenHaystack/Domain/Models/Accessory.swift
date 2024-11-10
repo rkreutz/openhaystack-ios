@@ -41,7 +41,8 @@ extension Accessory {
             protectedStorage: KeychainStorage(),
             httpClient: URLSessionHTTPClient(session: .shared),
             serverConfigurationRepository: ServerConfigurationRepository(storage: UserDefaults.standard), 
-            reportsConfigurationRepository: ReportsConfigurationRepository(storage: UserDefaults.standard)
+            reportsConfigurationRepository: ReportsConfigurationRepository(storage: UserDefaults.standard), 
+            geocodeRepository: GeocodeRepository()
         )
     }
     

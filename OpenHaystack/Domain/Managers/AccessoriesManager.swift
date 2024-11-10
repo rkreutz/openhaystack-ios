@@ -62,7 +62,6 @@ final class AccessoriesManager: AccessoriesProvider, AccessoriesFetcher, Accesso
                 return fetchPublisher
             } else {
                 self.fetchPublisher = repository.fetchAccessoriesReportedLocations()
-                    .last()
                     .share()
                     .handleEvents(
                         receiveSubscription: { [weak self] _ in
