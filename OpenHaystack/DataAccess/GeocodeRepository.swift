@@ -16,6 +16,7 @@ final class GeocodeRepository {
     }
     
     // TODO: Backpressure this to throtle 50 requests per minute
+    // TODO: add disk cache of reverse geocode locations to the nearest 5/10 meters
     func reverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
         Future { fulfill in self.remoteReverseGeocodeLocation(location) { fulfill($0) } }
             .catch { error in
