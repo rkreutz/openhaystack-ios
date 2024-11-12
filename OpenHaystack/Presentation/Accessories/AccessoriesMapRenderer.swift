@@ -100,7 +100,7 @@ final class AccessoriesMapRenderer: NSObject, MapRenderer {
                     annotationsToBeRemoved.forEach { annotations.removeValue(forKey: $0.id) }
                 }
                 
-                if !hasCentered {
+                if !hasCentered, !annotations.isEmpty {
                     hasCentered = true
                     mapView.showAnnotations(
                         annotations.values.map { $0 },
