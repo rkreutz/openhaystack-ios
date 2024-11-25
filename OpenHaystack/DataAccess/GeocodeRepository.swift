@@ -15,33 +15,31 @@ final class GeocodeRepository {
         case noPlacemark
     }
     
-    // TODO: Backpressure this to throtle 50 requests per minute
+    private let rateLimiter = RateLimiter<String>(
+        config: .init(
+            concurrentLimit: 1,
+            intervalLimit: 50,
+            interval: .seconds(60)
+        )
+    )
+    
     // TODO: add disk cache of reverse geocode locations to the nearest 5/10 meters
     func reverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
-        Future { fulfill in self.remoteReverseGeocodeLocation(location) { fulfill($0) } }
-            .catch { error in
-                switch error {
-                case let error as CLError where error.code == CLError.Code.network:
-                    print("possibly rate limited")
-                    return Just(Void())
-                        .delay(for: 60, scheduler: DispatchQueue.main)
-                        .flatMap { _ in self.reverseGeocodeLocation(location) }
-                        .eraseToAnyPublisher()
-                default:
-                    return Fail(error: error)
-                        .eraseToAnyPublisher()
-                }
-            }
-            .eraseToAnyPublisher()
+        remoteReverseGeocodeLocation(location)
     }
     
-    private func remoteReverseGeocodeLocation(_ location: CLLocation, completion: @escaping (Result<CLPlacemark, Swift.Error>) -> Void) {
-        CLGeocoder().reverseGeocodeLocation(location) { placemarks, error in
-            if let placemark = placemarks?.first {
-                completion(.success(placemark))
-            } else {
-                completion(.failure(error ?? Error.noPlacemark))
+    private func remoteReverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
+        rateLimiter.throttle(
+            withKey: "CLGeocoder.reverseGeocodeLocation",
+            publisher: Future { fulfill in
+                CLGeocoder().reverseGeocodeLocation(location) { placemarks, error in
+                    if let placemark = placemarks?.first {
+                        fulfill(.success(placemark))
+                    } else {
+                        fulfill(.failure(error ?? Error.noPlacemark))
+                    }
+                }
             }
-        }
+        )
     }
 }
