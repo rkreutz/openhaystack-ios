@@ -14,6 +14,7 @@ final class SettingsViewController: UIViewController, ContentController {
     var authorizationSwitch: UISwitch { settingsView.authorizationSwitch }
     var authorizationTextField: UITextField { settingsView.authorizationTextField }
     var daysStepper: UIStepper { settingsView.daysStepper }
+    var cacheStepper: UIStepper { settingsView.cacheStepper }
     
     private var serverConfiguration = ServerConfiguration.current() {
         didSet {
@@ -80,6 +81,12 @@ final class SettingsViewController: UIViewController, ContentController {
         daysStepper.maximumValue = 21
         daysStepper.value = Double(reportsConfiguration.numberOfDays)
         daysStepper.addTarget(self, action: #selector(didUpdateStepper), for: .valueChanged)
+        
+        cacheStepper.minimumValue = 5
+        cacheStepper.maximumValue = 200
+        cacheStepper.stepValue = 5
+        cacheStepper.value = reportsConfiguration.cacheFactor
+        cacheStepper.addTarget(self, action: #selector(didUpdateStepper), for: .valueChanged)
     }
     
     func mapRenderer() -> MapRenderer? { nil }
@@ -110,7 +117,14 @@ private extension SettingsViewController {
     
     @objc
     func didUpdateStepper(_ sender: UIStepper) {
-        reportsConfiguration.numberOfDays = Int(sender.value)
+        switch sender {
+        case daysStepper:
+            reportsConfiguration.numberOfDays = Int(sender.value)
+        case cacheStepper:
+            reportsConfiguration.cacheFactor = sender.value
+        default:
+            break
+        }
     }
 }
 

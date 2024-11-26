@@ -112,7 +112,8 @@ final class SettingsView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = """
-        Specify how many days worth of location updates should be fetched.
+        Specify how many days worth of location updates should be fetched and reverse \
+        geocoding caching factor (given in meters).
         """
         label.font = UIFont.preferredFont(forTextStyle: .caption1)
         label.textColor = .secondaryLabel
@@ -138,7 +139,7 @@ final class SettingsView: UIView {
         return label
     }()
     
-    private let stepperLabel: UILabel = {
+    private let dayStepperLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: .regular)
@@ -148,6 +149,32 @@ final class SettingsView: UIView {
     }()
     
     let daysStepper: UIStepper = {
+        let stepper = UIStepper()
+        stepper.translatesAutoresizingMaskIntoConstraints = false
+        stepper.setContentHuggingPriority(.required, for: .vertical)
+        stepper.setContentHuggingPriority(.required, for: .horizontal)
+        stepper.setContentCompressionResistancePriority(.required, for: .vertical)
+        stepper.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return stepper
+    }()
+    
+    private let reverseGeocodeLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Cache factor"
+        return label
+    }()
+    
+    private let cacheStepperLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: .regular)
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return label
+    }()
+    
+    let cacheStepper: UIStepper = {
         let stepper = UIStepper()
         stepper.translatesAutoresizingMaskIntoConstraints = false
         stepper.setContentHuggingPriority(.required, for: .vertical)
@@ -175,7 +202,10 @@ final class SettingsView: UIView {
         addSubview(secondSectionView)
         secondSectionView.addSubview(daysLabel)
         secondSectionView.addSubview(daysStepper)
-        secondSectionView.addSubview(stepperLabel)
+        secondSectionView.addSubview(dayStepperLabel)
+        secondSectionView.addSubview(reverseGeocodeLabel)
+        secondSectionView.addSubview(cacheStepper)
+        secondSectionView.addSubview(cacheStepperLabel)
         addSubview(secondSectionFooter)
     }
     
@@ -262,24 +292,44 @@ final class SettingsView: UIView {
         
         NSLayoutConstraint.activate([
             daysStepper.topAnchor.constraint(equalTo: secondSectionView.topAnchor, constant: 8),
-            daysStepper.trailingAnchor.constraint(equalTo: secondSectionView.trailingAnchor, constant: -16),
-            daysStepper.bottomAnchor.constraint(equalTo: secondSectionView.bottomAnchor, constant: -8)
+            daysStepper.trailingAnchor.constraint(equalTo: secondSectionView.trailingAnchor, constant: -16)
         ])
         
         NSLayoutConstraint.activate([
-            stepperLabel.centerYAnchor.constraint(equalTo: daysStepper.centerYAnchor),
-            stepperLabel.trailingAnchor.constraint(equalTo: daysStepper.leadingAnchor, constant: -8)
+            dayStepperLabel.centerYAnchor.constraint(equalTo: daysStepper.centerYAnchor),
+            dayStepperLabel.trailingAnchor.constraint(equalTo: daysStepper.leadingAnchor, constant: -8)
         ])
         
         NSLayoutConstraint.activate([
             daysLabel.centerYAnchor.constraint(equalTo: daysStepper.centerYAnchor),
             daysLabel.leadingAnchor.constraint(equalTo: secondSectionView.leadingAnchor, constant: 16),
-            daysLabel.trailingAnchor.constraint(equalTo: stepperLabel.leadingAnchor, constant: -8)
+            daysLabel.trailingAnchor.constraint(equalTo: dayStepperLabel.leadingAnchor, constant: -8)
         ])
         
         daysStepper.addObserver(self, forKeyPath: "value", context: nil)
         daysStepper.addTarget(self, action: #selector(stepperUpdate), for: .valueChanged)
-        stepperUpdate()
+        stepperUpdate(daysStepper)
+        
+        NSLayoutConstraint.activate([
+            cacheStepper.topAnchor.constraint(equalTo: daysStepper.bottomAnchor, constant: 16),
+            cacheStepper.trailingAnchor.constraint(equalTo: secondSectionView.trailingAnchor, constant: -16),
+            cacheStepper.bottomAnchor.constraint(equalTo: secondSectionView.bottomAnchor, constant: -8)
+        ])
+        
+        NSLayoutConstraint.activate([
+            cacheStepperLabel.centerYAnchor.constraint(equalTo: cacheStepper.centerYAnchor),
+            cacheStepperLabel.trailingAnchor.constraint(equalTo: cacheStepper.leadingAnchor, constant: -8)
+        ])
+        
+        NSLayoutConstraint.activate([
+            reverseGeocodeLabel.centerYAnchor.constraint(equalTo: cacheStepper.centerYAnchor),
+            reverseGeocodeLabel.leadingAnchor.constraint(equalTo: secondSectionView.leadingAnchor, constant: 16),
+            reverseGeocodeLabel.trailingAnchor.constraint(equalTo: cacheStepperLabel.leadingAnchor, constant: -8)
+        ])
+        
+        cacheStepper.addObserver(self, forKeyPath: "value", context: nil)
+        cacheStepper.addTarget(self, action: #selector(stepperUpdate), for: .valueChanged)
+        stepperUpdate(cacheStepper)
         
         subscriptions.append(
             NotificationCenter.default.addObserver(
@@ -306,8 +356,8 @@ final class SettingsView: UIView {
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         switch (object, keyPath) {
-        case (let stepper as UIStepper, "value") where stepper == daysStepper:
-            stepperUpdate()
+        case (let stepper as UIStepper, "value"):
+            stepperUpdate(stepper)
         default:
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
@@ -316,7 +366,14 @@ final class SettingsView: UIView {
 
 private extension SettingsView {
     @objc
-    func stepperUpdate() {
-        stepperLabel.text = "\(Int(daysStepper.value))"
+    func stepperUpdate(_ sender: UIStepper) {
+        switch sender {
+        case daysStepper:
+            dayStepperLabel.text = "\(Int(daysStepper.value))"
+        case cacheStepper:
+            cacheStepperLabel.text = "\(Int(cacheStepper.value))"
+        default:
+            break
+        }
     }
 }

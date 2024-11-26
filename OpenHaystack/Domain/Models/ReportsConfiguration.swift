@@ -9,6 +9,7 @@ import Foundation
 
 struct ReportsConfiguration {
     var numberOfDays: Int
+    var cacheFactor: Double
 }
 
 extension ReportsConfiguration {

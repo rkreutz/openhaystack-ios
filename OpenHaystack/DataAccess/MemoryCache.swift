@@ -13,8 +13,20 @@ public final class MemoryCache<Key: Hashable, Value>: ExpressibleByDictionaryLit
     private var cache: [Key: Value] = [:]
     private var subjects: [Key: CurrentValueSubject<Value?, Never>] = [:]
     private let queue = DispatchQueue(label: "com.rkreutz.MemoryCache", attributes: [.concurrent])
+    
+    public var keys: [Key: Value].Keys {
+        queue.sync { cache.keys }
+    }
+    
+    public var values: [Key: Value].Values {
+        queue.sync { cache.values }
+    }
 
     public init() {}
+    
+    public required init<S: Sequence>(uniqueKeysWithValues elements: S) where S.Element == (Key, Value) {
+        cache = .init(uniqueKeysWithValues: elements)
+    }
 
     public required init(dictionaryLiteral elements: (Key, Value)...) {
         cache = .init(uniqueKeysWithValues: elements)

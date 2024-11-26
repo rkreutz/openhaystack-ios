@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import Contacts
 
 final class GeocodeRepository {
     
@@ -22,10 +23,23 @@ final class GeocodeRepository {
             interval: .seconds(60)
         )
     )
+    private let configurationRepository = ReportsConfigurationRepository(storage: UserDefaults.standard)
+    private let storage: GeocoderStorage = GeocoderStorageImpl()
     
-    // TODO: add disk cache of reverse geocode locations to the nearest 5/10 meters
-    func reverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
-        remoteReverseGeocodeLocation(location)
+    func reverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<String, Swift.Error> {
+        Deferred {
+            if let placemark = self.storage.reverseGeocodeLocation(location, withCacheFactor: self.configurationRepository.reportsConfiguration().cacheFactor) {
+                return Just(placemark)
+                    .setFailureType(to: Swift.Error.self)
+                    .eraseToAnyPublisher()
+            } else {
+                return self.remoteReverseGeocodeLocation(location)
+                    .compactMap { $0.address() }
+                    .handleEvents(receiveOutput: { self.storage.save(address: $0, for: location, cacheFactor: self.configurationRepository.reportsConfiguration().cacheFactor) })
+                    .eraseToAnyPublisher()
+            }
+        }
+        .eraseToAnyPublisher()
     }
     
     private func remoteReverseGeocodeLocation(_ location: CLLocation) -> AnyPublisher<CLPlacemark, Swift.Error> {
@@ -41,5 +55,19 @@ final class GeocodeRepository {
                 }
             }
         )
+    }
+}
+
+private extension CLPlacemark {
+    static let formatter = CNPostalAddressFormatter()
+    
+    func address() -> String? {
+        if let address = postalAddress.flatMap(CLPlacemark.formatter.string(from: )) {
+            return address.replacingOccurrences(of: "\n", with: ", ")
+        } else {
+            return [name, thoroughfare, subLocality, locality]
+                .compactMap { $0 }
+                .joined(separator: ", ")
+        }
     }
 }

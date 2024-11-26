@@ -53,7 +53,7 @@ final class AccessoryHistoryMapRenderer: NSObject, MapRenderer {
                 
                 for location in accessory.locations {
                     if let annotation = syncQueue.sync(execute: { annotations[location.id] }) {
-                        if annotation.update(with: location, isLatest: location != accessory.latestLocation) {
+                        if annotation.update(with: location, isLatest: location == accessory.latestLocation) {
                             annotationsToBeUpdated.append(annotation)
                         }
                     } else {

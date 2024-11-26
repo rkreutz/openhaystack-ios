@@ -11,6 +11,7 @@ final class ReportsConfigurationRepository {
     
     enum Constants {
         static let numberOfDaysKey = "number_of_days"
+        static let cacheFactorKey = "cache_factor_key"
     }
     
     private let storage: KeyValueStorage
@@ -20,7 +21,8 @@ final class ReportsConfigurationRepository {
     
     func reportsConfiguration() -> ReportsConfiguration {
         ReportsConfiguration(
-            numberOfDays: storage.integer(forKey: Constants.numberOfDaysKey) ?? 7
+            numberOfDays: storage.integer(forKey: Constants.numberOfDaysKey) ?? 7,
+            cacheFactor: storage.value(forKey: Constants.cacheFactorKey) ?? 10
         )
     }
     

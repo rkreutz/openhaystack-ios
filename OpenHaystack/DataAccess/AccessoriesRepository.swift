@@ -230,9 +230,9 @@ final class AccessoriesRepository {
             return accessories.reverseGeocodeLocations(geocodeRepository: geocodeRepository)
                 .receive(on: DispatchQueue(label: "syncQueue"))
                 .scan(accessories) { partialResult, element in
-                    let (accessoryIndex, locationIndex, placemark) = (element.accessoryIndex, element.locationIndex, element.placemark)
+                    let (accessoryIndex, locationIndex, address) = (element.accessoryIndex, element.locationIndex, element.address)
                     var partialResult = partialResult
-                    partialResult[accessoryIndex].locations[locationIndex].address = placemark?.name ?? placemark?.thoroughfare ?? placemark?.subLocality ?? placemark?.locality
+                    partialResult[accessoryIndex].locations[locationIndex].address = address
                     return partialResult
                 }
                 .prepend(accessories)
@@ -245,7 +245,7 @@ private extension Array where Element == Accessory {
     struct FlattenAccesoryLocationPlacemark {
         var accessoryIndex: Int
         var locationIndex: Int
-        var placemark: CLPlacemark?
+        var address: String?
     }
     
     func reverseGeocodeLocations(geocodeRepository: GeocodeRepository) -> AnyPublisher<FlattenAccesoryLocationPlacemark, Swift.Error> {
@@ -259,9 +259,9 @@ private extension Array where Element == Accessory {
                     }
                     .map { (accessoryIndex, locationIndex, location) -> AnyPublisher<FlattenAccesoryLocationPlacemark, Swift.Error> in
                         geocodeRepository.reverseGeocodeLocation(CLLocation(from: location))
-                            .map { $0 as CLPlacemark? }
+                            .map { $0 as String? }
                             .catch { _ in Just(nil) }
-                            .map { FlattenAccesoryLocationPlacemark(accessoryIndex: accessoryIndex, locationIndex: locationIndex, placemark: $0) }
+                            .map { FlattenAccesoryLocationPlacemark(accessoryIndex: accessoryIndex, locationIndex: locationIndex, address: $0) }
                             .setFailureType(to: Swift.Error.self)
                             .eraseToAnyPublisher()
                     }

@@ -10,6 +10,7 @@
 		3759199D2CDDBAFC00C9B23C /* GeocodeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */; };
 		375919A22CF0C25F00C9B23C /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375919A12CF0C25F00C9B23C /* MemoryCache.swift */; };
 		375919A42CF0C3C300C9B23C /* RateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375919A32CF0C3C300C9B23C /* RateLimiter.swift */; };
+		375919A62CF5135700C9B23C /* GeocoderStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375919A52CF5135700C9B23C /* GeocoderStorage.swift */; };
 		378DC76A2BAE8F9A00007286 /* LocationDotLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC7692BAE8F9A00007286 /* LocationDotLayer.swift */; };
 		378DC76C2BAE909400007286 /* CALayer+DrawImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC76B2BAE909400007286 /* CALayer+DrawImage.swift */; };
 		378DC76E2BAE989800007286 /* CGRect+Pad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378DC76D2BAE989800007286 /* CGRect+Pad.swift */; };
@@ -70,6 +71,7 @@
 		3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocodeRepository.swift; sourceTree = "<group>"; };
 		375919A12CF0C25F00C9B23C /* MemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCache.swift; sourceTree = "<group>"; };
 		375919A32CF0C3C300C9B23C /* RateLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateLimiter.swift; sourceTree = "<group>"; };
+		375919A52CF5135700C9B23C /* GeocoderStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocoderStorage.swift; sourceTree = "<group>"; };
 		378DC7692BAE8F9A00007286 /* LocationDotLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDotLayer.swift; sourceTree = "<group>"; };
 		378DC76B2BAE909400007286 /* CALayer+DrawImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+DrawImage.swift"; sourceTree = "<group>"; };
 		378DC76D2BAE989800007286 /* CGRect+Pad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Pad.swift"; sourceTree = "<group>"; };
@@ -269,11 +271,12 @@
 				37F09EFC2BADFC6D009A0BAB /* BluetoothScanner.swift */,
 				37F09EDA2BAC44F3009A0BAB /* DecryptReports.swift */,
 				3759199C2CDDBAFC00C9B23C /* GeocodeRepository.swift */,
+				375919A52CF5135700C9B23C /* GeocoderStorage.swift */,
 				37F09ED42BABA3A6009A0BAB /* HTTPClient.swift */,
 				37F09EE52BAC5BEE009A0BAB /* KeychainStorage.swift */,
 				37F09EC42BAAED77009A0BAB /* KeyValueStorage.swift */,
-				37F09ECF2BAB3869009A0BAB /* ProtectedKeyValueStorage.swift */,
 				375919A12CF0C25F00C9B23C /* MemoryCache.swift */,
+				37F09ECF2BAB3869009A0BAB /* ProtectedKeyValueStorage.swift */,
 				375919A32CF0C3C300C9B23C /* RateLimiter.swift */,
 				37F09EF12BADBCE9009A0BAB /* ReportsConfigurationRepository.swift */,
 				37F09EC22BAAEAC3009A0BAB /* ServerConfigurationRepository.swift */,
@@ -446,6 +449,7 @@
 				37F09E952BA273BF009A0BAB /* AccessoriesView.swift in Sources */,
 				37F09EAD2BA499EC009A0BAB /* Accessory.swift in Sources */,
 				37F09EF72BADC23F009A0BAB /* AccessoryEditorView.swift in Sources */,
+				375919A62CF5135700C9B23C /* GeocoderStorage.swift in Sources */,
 				37F09ED32BAB38BB009A0BAB /* AccessoryLocalDTO.swift in Sources */,
 				37F09EB82BA50DED009A0BAB /* AccessoriesMapRenderer.swift in Sources */,
 				37F09ED02BAB3869009A0BAB /* ProtectedKeyValueStorage.swift in Sources */,
