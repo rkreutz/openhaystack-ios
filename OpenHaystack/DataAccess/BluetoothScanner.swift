@@ -5,7 +5,7 @@
 //  Created by Rodrigo Kreutz on 22/03/24.
 //
 
-import Foundation
+import UIKit
 import CoreBluetooth
 import Combine
 
@@ -21,12 +21,26 @@ final class BluetoothScanner {
         delegate = .init()
         scanner = CBCentralManager(delegate: delegate, queue: DispatchQueue.global())
         
-        delegate.state
-            .sink(receiveValue: { [scanner] in
-                guard $0 == .poweredOn else { return }
-                scanner.scanForPeripherals(withServices: nil)
-            })
-            .store(in: &cancellables)
+        // Bluetooth scanning BLE beacons from Find My network on iOS
+        // doesn't yield any results, apparently only Macs can handle
+        // these kind of beacons.
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            delegate.state
+                .sink(receiveValue: { [scanner] in
+                    guard $0 == .poweredOn else { return }
+                    scanner.scanForPeripherals(withServices: nil)
+                })
+                .store(in: &cancellables)
+            
+            NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+                .sink(receiveValue: { [scanner] _ in scanner.stopScan() })
+                .store(in: &cancellables)
+            
+            NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+                .filter { [delegate] _ in delegate.state.value == .poweredOn }
+                .sink(receiveValue: { [scanner] _ in scanner.scanForPeripherals(withServices: nil) })
+                .store(in: &cancellables)
+        }
     }
     
     private final class Delegate: NSObject, CBCentralManagerDelegate {
