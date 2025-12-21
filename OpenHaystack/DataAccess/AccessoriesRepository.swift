@@ -119,7 +119,7 @@ final class AccessoriesRepository {
     }
     
     private func fetchRecordsFromRemote() -> ([Accessory]) -> AnyPublisher<[Accessory], Swift.Error> {
-        { accessories in
+        return { accessories -> AnyPublisher<[Accessory], Swift.Error> in
             Future<Data, Swift.Error> { fulfill in
                 let serverConfiguration = self.serverConfigurationRepository.serverConfiguration()
                 let reportsConfiguration = self.reportsConfigurationRepository.reportsConfiguration()
@@ -146,13 +146,17 @@ final class AccessoriesRepository {
                     headers[.authorization] = string
                 }
                 
+                let ids = hashedKeys.map { "\"\($0)\"" }.joined(separator: ",")
+                let startDate = UInt((Date().timeIntervalSince1970 - Double(reportsConfiguration.numberOfDays) * 24 * 60 * 60) * 1000)
+                let endDate = UInt(Date().timeIntervalSince1970 * 1000)
+                
                 let body = """
                 {
                     "search": [
                         {
-                            "ids": [\(hashedKeys.map { "\"\($0)\"" }.joined(separator: ","))],
-                            "startDate": "\(UInt((Date().timeIntervalSince1970 - Double(reportsConfiguration.numberOfDays) * 24 * 60 * 60) * 1000))",
-                            "endDate": "\(UInt(Date().timeIntervalSince1970 * 1000))"
+                            "ids": [\(ids)],
+                            "startDate": "\(startDate)",
+                            "endDate": "\(endDate)"
                         }
                     ]
                 }
