@@ -55,7 +55,10 @@ enum DecryptReports {
     /// - Throws: Errors if the decryption fails
     /// - Returns: An decrypted location report
     static func decrypt(report: FindMyReport, with key: Data) throws -> FindMyLocationReport {
-        let payloadData = report.payload
+        var payloadData = report.payload
+        if payloadData.count == 89 {
+            payloadData.remove(at: 5)
+        }
         let keyData = key
 
         let privateKey = keyData
